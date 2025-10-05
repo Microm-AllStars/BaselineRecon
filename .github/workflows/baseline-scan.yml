@@ -1,0 +1,53 @@
+# This GitHub Action runs the Baseline Recon CLI on every pull request.
+name: 'Baseline Recon Scan'
+
+on:
+  pull_request:
+    branches: [ main ] # Or your default branch
+
+jobs:
+  recon-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Use a recent LTS version
+
+      # 3. Install dependencies and compile the code
+      - name: Install dependencies and compile
+        working-directory: ./vscode-extension
+        run: |
+          npm install
+          npm run compile
+
+      # 4. Run the Baseline Recon CLI
+      - name: Run Baseline Recon Scan
+        id: scan
+        # We add a threshold check here. The script will exit with an error if the score is too low.
+        run: |
+          MIN_SCORE=80 # Set your desired minimum score here
+          
+          # Run the compiled JavaScript file from the `out` directory
+          SCAN_OUTPUT=$(node ./vscode-extension/server/out/cli.js . --min-score=$MIN_SCORE)
+          echo "SCAN_OUTPUT<<EOF" >> $GITHUB_OUTPUT
+          echo "$SCAN_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      # 5. Comment on the Pull Request with the results
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const output = `## 📊 Baseline Recon Report\n\n\`\`\`\n${{ steps.scan.outputs.SCAN_OUTPUT }}\n\`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })

@@ -1,0 +1,69 @@
+{
+  "name": "baseline-recon-vscode",
+  "displayName": "Baseline Recon Linter",
+  "description": "Lints your code for outdated web platform features.",
+  "version": "0.0.1",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters"
+  ],
+  "activationEvents": [
+    "onLanguage:css",
+    "onLanguage:javascript",
+    "onLanguage:scss",
+    "onLanguage:less",
+    "onLanguage:typescript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact",
+    "onLanguage:html"
+  ],
+  "main": "./client/out/extension.js",
+  "contributes": {
+    "server": {
+      "id": "baselineReconLinter",
+      "path": "./server/out/server.js"
+    },
+    "commands": [
+      {
+        "command": "baselineRecon.calculateScore",
+        "title": "Baseline Recon: Calculate Project Score",
+        "category": "Baseline Recon"
+      },
+      {
+        "command": "baselineRecon.showHistory",
+        "title": "Baseline Recon: Show Score History",
+        "category": "Baseline Recon"
+      },
+      {
+        "command": "baselineRecon.showHistoryChart",
+        "title": "Baseline Recon: Show Score History Chart",
+        "category": "Baseline Recon"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "lint": "eslint ./src --ext .ts,.tsx",
+    "test": "node ./node_modules/vscode-test/bin/runTest"
+
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "eslint": "^8.41.0",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "chart.js": "^4.3.0",
+    "vscode-languageclient": "^8.1.0",
+    "vscode-languageserver": "^8.1.0",
+    "vscode-languageserver-textdocument": "^1.0.8"
+  }
+}

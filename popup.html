@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Baseline Recon</title>
+  <meta charset="UTF-8">
+
+  <style>
+    :root {
+      --bg-color: #2a2a2e;
+      --text-color: #e1e1e1;
+      --primary-color: #228B22; /* Forest Green */
+      --border-color: #4a4a4e;
+      --supported-color: #28a745;
+      --unsupported-color: #dc3545;
+      --card-bg: #333337;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+      width: 300px; 
+      padding: 16px; 
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 1.4em;
+    }
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #1A691A; /* Darker Forest Green */
+    }
+    button:disabled {
+      background-color: #a0a0a0;
+      cursor: not-allowed;
+    }
+    .category { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--card-bg); overflow: hidden; }
+    .category summary { padding: 10px 12px; font-weight: bold; cursor: pointer; }
+    .category div { padding: 0 12px 12px; font-size: 0.9em; }
+    .supported { color: var(--supported-color); }
+    .unsupported { color: var(--unsupported-color); }
+    .feature-item { margin-bottom: 6px; }
+    /* SVG Icon styles */
+    .icon {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      vertical-align: -0.125em; /* Better alignment with text */
+    }
+    /* Category progress bar styles */
+    .category-progress {
+      margin-bottom: 12px;
+      font-family: monospace, sans-serif;
+      font-size: 1.1em;
+    }
+    .progress-text {
+      color: var(--primary-color);
+    }
+    .percentage {
+      font-weight: bold;
+    }
+  </style>
+  <style>
+    /* Spinner styles */
+    .spinner {
+      display: none; /* Hidden by default */
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-left-color: var(--primary-color);
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    /* Progress bar styles */
+    .progress-bar-container {
+      width: 100%;
+      height: 12px;
+      background-color: var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .progress-bar-fill {
+      width: 0%; /* Will be set by JS */
+      height: 100%;
+      background-color: var(--primary-color);
+      border-radius: 6px;
+      transition: width 0.5s ease-out, background-color 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+  <h2>Baseline Recon</h2>
+  <div style="display: flex; align-items: center; margin-bottom: 10px;">
+    <button id="scanBtn" style="display: flex; align-items: center; gap: 6px;">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>
+      Scan Page
+    </button>
+    <div id="spinner" class="spinner"></div>
+  </div>
+  <div id="reconScore" style="font-size: 1.2em; font-weight: bold; margin: 10px 0; color: var(--text-color);"></div>
+  <div class="progress-bar-container">
+    <div id="reconProgressBar" class="progress-bar-fill"></div>
+  </div>
+  <div class="scan-options" style="margin-top: 12px; font-size: 0.9em; display: flex; align-items: center; gap: 8px;">
+    <input type="checkbox" id="deepScanToggle" />
+    <label for="deepScanToggle">Deep Scan (slower)</label>
+  </div>
+
+
+  <details class="category" open>
+    <summary style="display: flex; align-items: center; gap: 6px;">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"/></svg>
+      Core Features (Weight 3)
+    </summary>
+    <div id="coreResults"></div>
+  </details>
+
+  <details class="category" open>
+    <summary style="display: flex; align-items: center; gap: 6px;">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="M429.6 92.1c4.9-11.9 2.1-25.6-7-34.7s-22.8-11.9-34.7-7l-352 144c-14.2 5.8-22.2 20.8-19.3 35.8s16.1 25.7 31.4 25.7H112v96c0 16.5 13.5 30 30 30h80c16.5 0 30-13.5 30-30v-96h48.4c15.3 0 28.5-10.7 31.4-25.7s-5.1-30-19.3-35.8l-352-144z"/></svg>
+      Advanced Features (Weight 2)
+    </summary>
+    <div id="advancedResults"></div>
+  </details>
+
+  <details class="category" open>
+    <summary style="display: flex; align-items: center; gap: 6px;">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM337 209c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-111 111-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L337 209z"/></svg>
+      Optional &amp; Experimental (Weight 1)
+    </summary>
+    <div id="optionalResults"></div>
+  </details>
+
+<div class="export" style="margin-top:16px;">
+  <button id="export">Export JSON</button>
+  <button id="exportMD">Export Markdown</button>
+</div>
+
+</body>
+<script src="popup.js"></script>
+</html>

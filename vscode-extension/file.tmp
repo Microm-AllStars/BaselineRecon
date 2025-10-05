@@ -1,0 +1,4 @@
+.old-flexbox {
+  /* This line should get a yellow warning squiggle */
+  display: -webkit-box;
+}
