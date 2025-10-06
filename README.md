@@ -10,6 +10,10 @@ It serves not just as a linter, but as an educational tool and an automated guar
 
 ---
 
+## Video Explaination
+
+[Click to view video explaination](https://drive.google.com/file/d/1DOa95DEFmEJZD6Jr-WE0FbPKHi3zTbJS/view?usp=sharing)
+
 ## Table of Contents
 
 - [📊 Baseline Recon: Modernize Your Web Projects](#-baseline-recon-modernize-your-web-projects)
